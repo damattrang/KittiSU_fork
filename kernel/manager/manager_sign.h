@@ -25,6 +25,10 @@
 #define EXPECTED_SIZE_KOWX712 0x375
 #define EXPECTED_HASH_KOWX712 "484fcba6e6c43b1fb09700633bf2fb4758f13cb0b2f4457b80d075084b26c588"
 
+// KittiSU/KittiSU
+#define EXPECTED_SIZE_KITTISU 0x2e8
+#define EXPECTED_HASH_KITTISU "9a8b292b21f688282a054729049afdb99ab67f24eb10fb05102963b79ac99810"
+
 typedef struct {
     unsigned size;
     const char *sha256;
