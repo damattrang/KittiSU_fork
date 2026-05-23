@@ -171,10 +171,10 @@ fun MoreSettingsScreen() {
                     val screenWidth = displayMetrics.widthPixels
                     val screenHeight = displayMetrics.heightPixels
 
-                    putExtra("aspectX", screenWidth)
-                    putExtra("aspectY", screenHeight)
+                    putExtra("aspectX", 16)
+                    putExtra("aspectY", 9)
                     putExtra("outputX", screenWidth)
-                    putExtra("outputY", screenHeight)
+                    putExtra("outputY", (screenWidth * 9) / 16)
 
                     putExtra("return-data", false)
 

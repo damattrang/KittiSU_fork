@@ -516,7 +516,8 @@ class MainActivity : ComponentActivity() {
                                                     ),
                                                     LocalSnackbarHost provides snackBarHostState,
                                                 ) {
-                                                    backgroundImagePainter?.let {
+                                                    if(false) {
+                                                        val it = backgroundImagePainter!!
                                                         Box(
                                                             modifier = Modifier
                                                                 .fillMaxSize()
@@ -717,7 +718,8 @@ fun rememberMaterial3BlurBackdrop(enableBlur: Boolean): LayerBackdrop? {
 
     return rememberLayerBackdrop {
         if (ThemeConfig.isEnableBlurExp) {
-            backgroundImagePainter?.let { painter ->
+            if(false) {
+                val painter = backgroundImagePainter!!
                 with(painter) {
                     draw(size = drawContext.size)
                 }

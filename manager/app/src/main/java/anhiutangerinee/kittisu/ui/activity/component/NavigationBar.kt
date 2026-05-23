@@ -32,6 +32,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -95,9 +99,9 @@ fun NavigationBar(
     if (isBottomBar) {
         FlexibleBottomAppBar(
             modifier = Modifier
-                .windowInsetsPadding(
-                    WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal)
-                )
+                .windowInsetsPadding(WindowInsets.navigationBars)
+                .padding(horizontal = 24.dp, vertical = 12.dp)
+                .clip(RoundedCornerShape(100))
                 .blurEffect(),
             containerColor =
                 if (ThemeConfig.isEnableBlur)

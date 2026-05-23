@@ -83,6 +83,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.paint
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -439,14 +441,24 @@ private fun TopBar(
 ) {
     val navigator = LocalNavigator.current
 
-    LargeFlexibleTopAppBar(
+    androidx.compose.material3.CenterAlignedTopAppBar(
         modifier = Modifier.blurEffect(),
         title = {
-            Text(
-                text = stringResource(R.string.app_name)
-            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = stringResource(R.string.app_name),
+                    style = MaterialTheme.typography.titleLarge
+                )
+                if (viewModel.isExtendedDataLoaded) {
+                    Text(
+                        text = "${viewModel.systemInfo.managerVersion.first} (${viewModel.systemInfo.managerVersion.second.toInt()})",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         },
-        colors = TopAppBarDefaults.topAppBarColors(
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor =
                 if (ThemeConfig.isEnableBlur)
                     Color.Transparent
@@ -460,7 +472,6 @@ private fun TopBar(
         ),
         actions = {
             if (viewModel.isCoreDataLoaded) {
-                // SuSFS 配置按钮
                 if (viewModel.systemInfo.susfsVersionSupported) {
                     IconButton(onClick = {
                         navigator.push(Route.SuSFSConfig)
@@ -471,26 +482,16 @@ private fun TopBar(
                         )
                     }
                 }
-
-                // 重启按钮
                 var showDropdown by remember { mutableStateOf(false) }
                 KsuIsValid {
-                    IconButton(onClick = {
-                        showDropdown = true
-                    }) {
+                    IconButton(onClick = { showDropdown = true }) {
                         Icon(
                             imageVector = Icons.Filled.PowerSettingsNew,
                             contentDescription = stringResource(id = R.string.reboot)
                         )
-
-                        DropdownMenuPopup(expanded = showDropdown, onDismissRequest = {
-                            showDropdown = false
-                        }) {
-                            DropdownMenuGroup(
-                                shapes = MenuDefaults.groupShapes()
-                            ) {
-                                val pm =
-                                    LocalContext.current.getSystemService(Context.POWER_SERVICE) as PowerManager?
+                        DropdownMenuPopup(expanded = showDropdown, onDismissRequest = { showDropdown = false }) {
+                            DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
+                                val pm = LocalContext.current.getSystemService(Context.POWER_SERVICE) as PowerManager?
                                 var methods = mapOf(
                                     R.string.reboot to "",
                                     R.string.reboot_soft to "soft_reboot",
@@ -499,12 +500,9 @@ private fun TopBar(
                                     R.string.reboot_download to "download",
                                     R.string.reboot_edl to "edl"
                                 )
-
-                                @Suppress("DEPRECATION")
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && pm?.isRebootingUserspaceSupported == true) {
                                     methods = methods + (R.string.reboot_userspace to "userspace")
                                 }
-
                                 RebootDropdownItems(methods)
                             }
                         }
@@ -527,166 +525,140 @@ private fun StatusCard(
         colors = getCardColors(
             if (systemStatus.ksuVersion != null) MaterialTheme.colorScheme.secondaryContainer
             else MaterialTheme.colorScheme.errorContainer
-        ),
+        ).let {
+            if (anhiutangerinee.kittisu.ui.theme.backgroundImagePainter != null) {
+                CardDefaults.elevatedCardColors(
+                    containerColor = it.containerColor.copy(alpha = 0.5f),
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                )
+            } else {
+                it
+            }
+        },
         elevation = getCardElevation(),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    if (systemStatus.isRootAvailable || systemStatus.kernelVersion.isGKI()) {
-                        onClickInstall()
-                    }
-                }
-                .padding(24.dp),
-            verticalAlignment = Alignment.CenterVertically
+        androidx.compose.foundation.layout.Box(
+            modifier = Modifier.fillMaxWidth()
         ) {
-            when {
-                systemStatus.ksuVersion != null -> {
-
-                    val workingModeText = when {
-                        Natives.isSafeMode -> stringResource(id = R.string.safe_mode)
-                        else -> stringResource(id = R.string.home_working)
+            if (anhiutangerinee.kittisu.ui.theme.backgroundImagePainter != null) {
+                androidx.compose.foundation.Image(
+                    painter = anhiutangerinee.kittisu.ui.theme.backgroundImagePainter!!,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.matchParentSize(),
+                    alpha = 0.8f
+                )
+            }
+            
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        if (systemStatus.isRootAvailable || systemStatus.kernelVersion.isGKI()) {
+                            onClickInstall()
+                        }
                     }
-
-                    val workingModeSurfaceText = when {
-                        systemStatus.lkmMode == true -> "LKM"
-                        else -> "Built-in"
-                    }
-
-                    Icon(
-                        Icons.Outlined.TaskAlt,
-                        contentDescription = stringResource(R.string.home_working),
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .size(28.dp)
-                            .padding(
-                                horizontal = 4.dp
-                            ),
-                    )
-
-                    Column(Modifier.padding(start = 20.dp)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = workingModeText,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
-
-                            Spacer(Modifier.width(8.dp))
-
-                            // 工作模式标签
+                    .padding(vertical = 32.dp, horizontal = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                when {
+                    systemStatus.ksuVersion != null -> {
+                        val workingModeText = when {
+                            Natives.isSafeMode -> stringResource(id = R.string.safe_mode)
+                            else -> stringResource(id = R.string.home_working)
+                        }
+                        val workingModeSurfaceText = when {
+                            systemStatus.lkmMode == true -> "LKM"
+                            else -> "Built-in"
+                        }
+                        
+                        Text(
+                            text = workingModeText,
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             LabelText(
                                 label = workingModeSurfaceText,
-                                containerColor = MaterialTheme.colorScheme.primary
+                                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                contentColor = MaterialTheme.colorScheme.onSurface
                             )
-
                             if (Natives.isLateLoadMode) {
                                 Spacer(Modifier.width(6.dp))
                                 LabelText(
                                     label = stringResource(id = R.string.jailbreak_mode),
-                                    containerColor = MaterialTheme.colorScheme.primary
+                                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                    contentColor = MaterialTheme.colorScheme.onSurface
                                 )
                             }
-
-                            // 架构标签
                             if (Os.uname().machine != "aarch64") {
                                 Spacer(Modifier.width(6.dp))
                                 LabelText(
                                     label = Os.uname().machine,
-                                    containerColor = MaterialTheme.colorScheme.primary
+                                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                    contentColor = MaterialTheme.colorScheme.onSurface
                                 )
                             }
                         }
-
-                        val isHideVersion = LocalContext.current.getSharedPreferences(
-                            "settings",
-                            Context.MODE_PRIVATE
-                        )
-                            .getBoolean("is_hide_version", false)
-
+                        val isHideVersion = LocalContext.current.getSharedPreferences("settings", Context.MODE_PRIVATE).getBoolean("is_hide_version", false)
                         if (!isHideVersion) {
-                            Spacer(Modifier.height(4.dp))
+                            Spacer(Modifier.height(8.dp))
                             systemStatus.ksuFullVersion?.let {
                                 Text(
                                     text = stringResource(R.string.home_working_version, it),
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.secondary,
+                                    color = MaterialTheme.colorScheme.onSurface,
                                 )
                             }
                         }
                     }
-                }
-
-                systemStatus.kernelVersion.isGKI() -> {
-                    Icon(
-                        Icons.Outlined.Warning,
-                        contentDescription = stringResource(R.string.home_not_installed),
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier
-                            .size(28.dp)
-                            .padding(
-                                horizontal = 4.dp
-                            ),
-                    )
-
-                    Column(Modifier
-                        .padding(start = 20.dp)
-                        .weight(1f)) {
+                    systemStatus.kernelVersion.isGKI() -> {
                         Text(
                             text = stringResource(R.string.home_not_installed),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.error
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                         )
-
-                        Spacer(Modifier.height(4.dp))
+                        Spacer(Modifier.height(8.dp))
+                        LabelText(
+                            label = "Legacy",
+                            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(Modifier.height(16.dp))
                         Text(
                             text = stringResource(R.string.home_click_to_install),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onErrorContainer
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
-                    }
-
-                    if (systemStatus.isSELinuxPermissive) {
-                        Button(
-                            onClick = onClickJailbreak,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.error,
-                                contentColor = MaterialTheme.colorScheme.onError
-                            )
-                        ) {
-                            Text(stringResource(R.string.home_jailbreak))
+                        if (systemStatus.isSELinuxPermissive) {
+                            Spacer(Modifier.height(16.dp))
+                            Button(
+                                onClick = onClickJailbreak,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.error,
+                                    contentColor = MaterialTheme.colorScheme.onError
+                                )
+                            ) {
+                                Text(stringResource(R.string.home_jailbreak))
+                            }
                         }
                     }
-                }
-
-                else -> {
-                    Icon(
-                        Icons.Outlined.Block,
-                        contentDescription = stringResource(R.string.home_unsupported),
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier
-                            .size(28.dp)
-                            .padding(
-                                horizontal = 4.dp
-                            ),
-                    )
-
-                    Column(Modifier.padding(start = 20.dp)) {
+                    else -> {
                         Text(
                             text = stringResource(R.string.home_unsupported),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.error
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                         )
-
-                        Spacer(Modifier.height(4.dp))
+                        Spacer(Modifier.height(8.dp))
                         Text(
                             text = stringResource(R.string.home_unsupported_reason),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onErrorContainer
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
