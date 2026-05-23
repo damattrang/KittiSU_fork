@@ -5,10 +5,10 @@ import android.app.Activity
 import android.content.Context
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
-import com.resukisu.resukisu.R
-import com.resukisu.resukisu.ui.util.install
-import com.resukisu.resukisu.ui.util.rootAvailable
-import com.resukisu.resukisu.utils.AssetsUtil
+import anhiutangerinee.kittisu.R
+import anhiutangerinee.kittisu.ui.util.install
+import anhiutangerinee.kittisu.ui.util.rootAvailable
+import anhiutangerinee.kittisu.utils.AssetsUtil
 import com.topjohnwu.superuser.Shell
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
