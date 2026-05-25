@@ -66,6 +66,7 @@ jobs:
         uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
+          build-mode: manual
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
