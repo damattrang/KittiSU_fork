@@ -3,7 +3,7 @@ define check_ksu_hook
       $$(info -- $$(REPO_NAME)/manual_hook: $(1) found)
   else
       $$(info -- You lost $(1) hook in your kernel)
-      $$(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
+      $$(info -- Read: https://github.com/backslashxx/KernelSU/issues/5)
       $$(error You should integrate $$(REPO_NAME) in your kernel. $(3))
   endif
 endef
@@ -11,7 +11,7 @@ endef
 define check_ksu_hook_incompatible
   ifeq ($$(shell grep -q "$(1)" $(2); echo $$$$?),0)
       $$(info -- $(1) is incompatible hook)
-      $$(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
+      $$(info -- Read: https://github.com/backslashxx/KernelSU/issues/5)
       $$(error You should integrate $$(REPO_NAME) in your kernel correctly.)
   endif
 endef
@@ -61,12 +61,12 @@ endif
         $(info -- $(REPO_NAME)/manual_hook: ksu_handle_execve found)
       else
         $(info -- You lost ksu_handle_execve hook in your kernel)
-        $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
+        $(info -- Read: https://github.com/backslashxx/KernelSU/issues/5)
         $(error You should integrate $(REPO_NAME) in your kernel.)
       endif
     else
       $(info -- You lost ksu_handle_execveat hook in your kernel)
-      $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
+      $(info -- Read: https://github.com/backslashxx/KernelSU/issues/5)
       $(error You should integrate $(REPO_NAME) in your kernel.)
     endif
   endif
